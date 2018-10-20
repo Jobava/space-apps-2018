@@ -3,17 +3,35 @@ import sys
 import numpy as np
 
 kernel = np.ones((3, 3), np.uint8)
-target_array = [[1, 0, -1], [0, 0, 0], [-1, 0, 1]]
+# target_array = [[1, 0, -1], [0, 0, 0], [-1, 0, 1]]
+target_array = [[-1,-1, -1], [-1, 8, -1], [-1, -1, -1]]
 for i, line in enumerate(target_array):
     for j, el in enumerate(line):
         kernel[i][j] = np.uint8(el)
+
+def nothing(x):
+    pass
+cv2.namedWindow('filters')
+cv2.createTrackbar('R1','filters',0,255, nothing)
+cv2.createTrackbar('G1','filters',0,255, nothing)
+cv2.createTrackbar('B1','filters',0,255, nothing)
+cv2.createTrackbar('R2','filters',0,255, nothing)
+cv2.createTrackbar('G2','filters',0,255, nothing)
+cv2.createTrackbar('B2','filters',0,255, nothing)
 
 camera = cv2.VideoCapture('http://192.168.1.143:8080/stream/video.mjpeg')
 while camera.isOpened():
 
     retval, im = camera.read()
     overlay = im.copy()
-    img_thresholded = cv2.inRange(overlay, (60, 60, 60), (120, 120, 120))
+    rgb1 = (cv2.getTrackbarPos('R1', 'filters'),
+            cv2.getTrackbarPos('G1', 'filters'),
+            cv2.getTrackbarPos('B1', 'filters'))
+    rgb2 = (cv2.getTrackbarPos('R2', 'filters'),
+            cv2.getTrackbarPos('G2', 'filters'),
+            cv2.getTrackbarPos('B2', 'filters'))
+    print(rgb1, rgb2)
+    img_thresholded = cv2.inRange(overlay, rgb1, rgb2)
     opening = cv2.morphologyEx(img_thresholded, cv2.MORPH_OPEN, kernel)
     cv2.imshow('gray_image.png', opening)
     opening= (255-opening)
